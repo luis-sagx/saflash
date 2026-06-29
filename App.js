@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { View, ActivityIndicator, StyleSheet, StatusBar } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import {
   useFonts,
   Nunito_300Light,
@@ -64,10 +65,12 @@ export default function App() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <StatusBar barStyle="dark-content" backgroundColor={COLORS.warmParchment} />
-      <NavigationContainer>
-        <AppNavigator />
-      </NavigationContainer>
+      <SafeAreaProvider>
+        <StatusBar barStyle="dark-content" backgroundColor={COLORS.warmParchment} />
+        <NavigationContainer>
+          <AppNavigator />
+        </NavigationContainer>
+      </SafeAreaProvider>
     </GestureHandlerRootView>
   );
 }
