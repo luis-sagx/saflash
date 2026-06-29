@@ -39,9 +39,15 @@ export default function ProgressScreen() {
     }, [refresh])
   );
 
-  // Calculate distribution percentages for the donut chart
-  const distributionTotal = study.newCount + study.learningCount + study.reviewingCount + study.knownCount || 1;
-  const newPct = Math.round((study.newCount / distributionTotal) * 100);
+  // Distribution is over EVERY card (words + phrases). Cards never studied have
+  // no user_progress row, so they aren't tracked — count them as "new" here so
+  // the chart reflects the whole deck, not just the handful already touched.
+  const totalCards = totalWords + totalPhrases;
+  const studiedCards = study.learningCount + study.reviewingCount + study.knownCount;
+  const newCount = Math.max(0, totalCards - studiedCards);
+
+  const distributionTotal = newCount + studiedCards || 1;
+  const newPct = Math.round((newCount / distributionTotal) * 100);
   const learningPct = Math.round((study.learningCount / distributionTotal) * 100);
   const reviewingPct = Math.round((study.reviewingCount / distributionTotal) * 100);
   const knownPct = Math.round((study.knownCount / distributionTotal) * 100);
@@ -63,21 +69,25 @@ export default function ProgressScreen() {
 
       {/* Word progress */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Palabras aprendidas</Text>
+        <Text style={styles.sectionTitle}>Tarjetas estudiadas</Text>
         <View style={styles.progressCard}>
           <View style={styles.progressRow}>
-            <Text style={styles.progressLabel}>Total</Text>
+            <Text style={styles.progressLabel}>Estudiadas</Text>
             <Text style={styles.progressValue}>
-              {formatProgress(study.knownCount, totalWords)} ({study.knownCount}/{totalWords})
+              {formatProgress(studiedCards, totalCards)} ({studiedCards}/{totalCards})
             </Text>
           </View>
           <ProgressBar
-            current={study.knownCount}
-            total={totalWords}
+            current={studiedCards}
+            total={totalCards}
             color={COLORS.deepOlive}
             backgroundColor={COLORS.sageCream}
             showLabel={false}
           />
+          <View style={[styles.progressRow, { marginTop: SPACING.sm, marginBottom: 0 }]}>
+            <Text style={styles.progressLabel}>Dominadas (conocidas)</Text>
+            <Text style={styles.progressValue}>{study.knownCount}</Text>
+          </View>
         </View>
       </View>
 
@@ -89,7 +99,7 @@ export default function ProgressScreen() {
             <View style={styles.distItem}>
               <View style={[styles.distDot, { backgroundColor: COLORS.textPlaceholder }]} />
               <Text style={styles.distLabel}>Nuevas</Text>
-              <Text style={styles.distValue}>{study.newCount} ({newPct}%)</Text>
+              <Text style={styles.distValue}>{newCount} ({newPct}%)</Text>
             </View>
             <View style={styles.distItem}>
               <View style={[styles.distDot, { backgroundColor: COLORS.dangerOrange }]} />

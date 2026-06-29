@@ -1,6 +1,7 @@
 // saflash — Study words screen (flashcard session)
 import React, { useState, useCallback } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../theme/colors';
 import { SPACING } from '../theme/spacing';
@@ -27,7 +28,7 @@ export default function StudyWordsScreen({ navigation, route }) {
     scoreCard,
     finishSession,
     resetSession,
-  } = useStudySession(CARD_TYPE.WORD, SESSION_SIZE);
+  } = useStudySession(CARD_TYPE.WORD, SESSION_SIZE, route.params?.category ?? null);
 
   const handleExit = () => {
     if (currentIndex > 0 && !isComplete) {

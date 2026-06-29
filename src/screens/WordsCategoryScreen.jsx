@@ -7,7 +7,7 @@ import { RADIUS, SPACING } from '../theme/spacing';
 import { FONT_FAMILY } from '../theme/typography';
 import { useCategoryWords } from '../hooks/useWords';
 import { getCategoryImage } from '../database/wordsRepository';
-import { formatCategoryName, formatDifficulty } from '../utils/formatters';
+import { formatCategoryName } from '../utils/formatters';
 import EmptyState from '../components/EmptyState';
 
 export default function WordsCategoryScreen({ route, navigation }) {
@@ -53,9 +53,6 @@ export default function WordsCategoryScreen({ route, navigation }) {
                 <Text style={styles.phonetic}>{item.phonetic}</Text>
               )}
             </View>
-            <View style={[styles.difficultyBadge, { backgroundColor: getDifficultyColor(item.difficulty) }]}>
-              <Text style={styles.difficultyText}>{item.difficulty}</Text>
-            </View>
           </TouchableOpacity>
         )}
       />
@@ -67,17 +64,6 @@ export default function WordsCategoryScreen({ route, navigation }) {
       </TouchableOpacity>
     </View>
   );
-}
-
-function getDifficultyColor(difficulty) {
-  const colors = {
-    A1: COLORS.successGreen,
-    A2: COLORS.amberGold,
-    B1: COLORS.accentOrange,
-    B2: '#D32F2F',
-    C1: '#7B1FA2',
-  };
-  return colors[difficulty] || COLORS.textSecondary;
 }
 
 const styles = StyleSheet.create({

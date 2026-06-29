@@ -49,9 +49,6 @@ export default function PhrasesCategoryScreen({ route, navigation }) {
                 <Text style={styles.context}>{item.context}</Text>
               )}
             </View>
-            <View style={[styles.difficultyBadge, { backgroundColor: getDifficultyColor(item.difficulty) }]}>
-              <Text style={styles.difficultyText}>{item.difficulty}</Text>
-            </View>
           </TouchableOpacity>
         )}
       />
@@ -63,17 +60,6 @@ export default function PhrasesCategoryScreen({ route, navigation }) {
       </TouchableOpacity>
     </View>
   );
-}
-
-function getDifficultyColor(difficulty) {
-  const colors = {
-    A1: COLORS.successGreen,
-    A2: COLORS.amberGold,
-    B1: COLORS.accentOrange,
-    B2: '#D32F2F',
-    C1: '#7B1FA2',
-  };
-  return colors[difficulty] || COLORS.textSecondary;
 }
 
 const styles = StyleSheet.create({

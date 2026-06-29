@@ -12,7 +12,6 @@ import SearchBar from '../components/SearchBar';
 import FilterPills from '../components/FilterPills';
 import EmptyState from '../components/EmptyState';
 import { formatCategoryName, formatNumber } from '../utils/formatters';
-import { DIFFICULTY_LEVELS } from '../utils/constants';
 
 export default function WordsScreen({ navigation }) {
   const { categories, loading, refresh } = useWords();
@@ -21,7 +20,6 @@ export default function WordsScreen({ navigation }) {
 
   const filterOptions = [
     { label: 'Todos', value: 'all' },
-    ...DIFFICULTY_LEVELS.map(d => ({ label: d, value: d })),
     { label: '⭐ Favoritos', value: 'favorites' },
   ];
 

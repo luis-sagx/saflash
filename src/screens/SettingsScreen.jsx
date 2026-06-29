@@ -10,7 +10,15 @@ import { DAILY_GOAL_OPTIONS } from '../utils/constants';
 import { formatNumber } from '../utils/formatters';
 
 export default function SettingsScreen() {
-  const { config, loading, updateDailyGoal, toggleNotifications, updateNotifHour, resetProgress } = useSettings();
+  const {
+    config,
+    loading,
+    notificationsSupported,
+    updateDailyGoal,
+    toggleNotifications,
+    updateNotifHour,
+    resetProgress,
+  } = useSettings();
   const [notifHour, setNotifHour] = useState(config?.notif_hour || 9);
 
   const handleReset = () => {
@@ -97,12 +105,19 @@ export default function SettingsScreen() {
           <Switch
             value={config?.notifications === 1}
             onValueChange={toggleNotifications}
+            disabled={!notificationsSupported}
             trackColor={{ false: COLORS.borderSage, true: COLORS.successGreen }}
             thumbColor={COLORS.surfaceWhite}
           />
         </View>
 
-        {config?.notifications === 1 && (
+        {!notificationsSupported && (
+          <Text style={styles.helperText}>
+            En Expo Go para Android las notificaciones no estan disponibles. Usa un development build para probarlas.
+          </Text>
+        )}
+
+        {config?.notifications === 1 && notificationsSupported && (
           <View style={styles.timePicker}>
             <TouchableOpacity onPress={() => handleNotifHourChange('down')}>
               <Ionicons name="remove-circle" size={28} color={COLORS.deepOlive} />
@@ -219,6 +234,12 @@ const styles = StyleSheet.create({
     fontFamily: FONT_FAMILY.regular,
     fontSize: 16,
     color: COLORS.oliveInk,
+  },
+  helperText: {
+    fontFamily: FONT_FAMILY.regular,
+    fontSize: 13,
+    color: COLORS.textSecondary,
+    marginTop: SPACING.sm,
   },
   timePicker: {
     flexDirection: 'row',

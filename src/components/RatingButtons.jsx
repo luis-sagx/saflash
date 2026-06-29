@@ -14,7 +14,7 @@ export default function RatingButtons({ onPress }) {
         onPress={() => onPress(RATING.HARD)}
         activeOpacity={0.8}
       >
-        <Text style={styles.label}>Difícil</Text>
+        <Text style={styles.label}>Hard</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
@@ -22,7 +22,7 @@ export default function RatingButtons({ onPress }) {
         onPress={() => onPress(RATING.MEDIUM)}
         activeOpacity={0.8}
       >
-        <Text style={styles.label}>Bien</Text>
+        <Text style={styles.label}>Good</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
@@ -30,7 +30,7 @@ export default function RatingButtons({ onPress }) {
         onPress={() => onPress(RATING.EASY)}
         activeOpacity={0.8}
       >
-        <Text style={styles.label}>Fácil</Text>
+        <Text style={styles.label}>Easy</Text>
       </TouchableOpacity>
     </View>
   );
@@ -39,15 +39,16 @@ export default function RatingButtons({ onPress }) {
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '95%',
+    justifyContent: 'center',
+    width: '100%',
+    gap: 12,
     marginTop: 20,
   },
   button: {
+    flex: 1,
     borderRadius: RADIUS.lg,
     paddingVertical: 12,
-    paddingHorizontal: 20,
-    minWidth: 90,
+    paddingHorizontal: 8,
     alignItems: 'center',
   },
   label: {
