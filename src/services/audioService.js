@@ -40,10 +40,46 @@ export async function speak(text, options = {}) {
 }
 
 export async function stopSpeaking() {
-  if (isSpeaking) {
-    await Speech.stop();
-    isSpeaking = false;
+  await Speech.stop();
+  isSpeaking = false;
+}
+
+/**
+ * Speaks several English texts back to back (e.g. word → meaning → example).
+ * Skips empty parts and inserts a short natural pause between them. Resolves
+ * when the whole sequence finishes (or is interrupted).
+ */
+export async function speakSequence(parts, options = {}) {
+  if (!soundEnabled) return;
+
+  const items = (parts || []).filter(p => p && String(p).trim().length > 0);
+  if (items.length === 0) return;
+
+  await Speech.stop();
+  isSpeaking = true;
+
+  for (let i = 0; i < items.length; i += 1) {
+    // Stop early if a newer speech request took over.
+    if (!isSpeaking) return;
+
+    await new Promise(resolve => {
+      Speech.speak(String(items[i]), {
+        language: 'en-US',
+        pitch: 1.0,
+        rate: options.rate || 0.85,
+        onDone: resolve,
+        onStopped: resolve,
+        onError: resolve,
+      });
+    });
+
+    // Brief pause between segments so they don't run together.
+    if (i < items.length - 1 && isSpeaking) {
+      await new Promise(resolve => setTimeout(resolve, 350));
+    }
   }
+
+  isSpeaking = false;
 }
 
 /**

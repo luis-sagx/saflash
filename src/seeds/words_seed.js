@@ -65,37 +65,16 @@ function guessPhonetic(word) {
 }
 
 // ── Example sentence generator ─────────────
-function makeExample(en, es, category) {
-  const templates = {
-    basics: [`I know ${en}.`, `Sé qué es ${es}.`],
-    verbs_common: [`I can ${en} it.`, `Puedo ${es}.`],
-    verbs_action: [`I like to ${en}.`, `Me gusta ${es}.`],
-    family: [`My ${en} is very kind.`, `Mi ${es} es muy amable.`],
-    body: [`My ${en} hurts.`, `Me duele ${es}.`],
-    health: [`The ${en} is important for health.`, `El/la ${es} es importante para la salud.`],
-    food_drink: [`I love ${en}.`, `Me encanta ${es}.`],
-    clothing: [`I need a new ${en}.`, `Necesito un/a ${es} nuevo/a.`],
-    home: [`The ${en} is in the house.`, `El/la ${es} está en la casa.`],
-    nature: [`The ${en} is beautiful.`, `El/la ${es} es hermoso/a.`],
-    animals: [`The ${en} is a wonderful animal.`, `El/la ${es} es un animal maravilloso.`],
-    colors_shapes: [`The ${en} color is nice.`, `El color ${es} es lindo.`],
-    numbers_time: [`${en} is my favorite.`, `${es} es mi favorito.`],
-    emotions: [`I feel ${en} today.`, `Me siento ${es} hoy.`],
-    work_business: [`The ${en} is in the office.`, `El/la ${es} está en la oficina.`],
-    technology: [`I use ${en} every day.`, `Uso ${es} todos los días.`],
-    transport: [`I take the ${en} to work.`, `Tomo el/la ${es} para ir al trabajo.`],
-    education: [`The ${en} is at school.`, `El/la ${es} está en la escuela.`],
-    sports: [`I play ${en} on weekends.`, `Juego ${es} los fines de semana.`],
-    arts_culture: [`I enjoy ${en} very much.`, `Disfruto mucho ${es}.`],
-    shopping: [`I want to buy ${en}.`, `Quiero comprar ${es}.`],
-    travel: [`I visited the ${en} last year.`, `Visité el/la ${es} el año pasado.`],
-    social: [`${en} is a common word.`, `${es} es una palabra común.`],
-    adjectives: [`It is very ${en}.`, `Es muy ${es}.`],
-    adverbs: [`He does it ${en}.`, `Él lo hace ${es}.`],
-    other: [`I like ${en}.`, `Me gusta ${es}.`],
-  };
-  const tpl = templates[category] || templates.other;
-  return [tpl[0], tpl[1]];
+// Offline fallback example. Real example sentences are fetched from the Free
+// Dictionary API on first view and replace these. This template is intentionally
+// a "meta" sentence that is ALWAYS grammatically correct for any part of speech
+// (the previous per-category templates produced broken phrases like "I can be
+// it."), and is itself useful: it reinforces the word and its meaning.
+function makeExample(en, es) {
+  return [
+    `The word "${en}" means "${es}".`,
+    `La palabra "${en}" significa "${es}".`,
+  ];
 }
 
 // ── COMPACT WORD DATA ──────────────────────
@@ -1226,7 +1205,7 @@ const WORDS_COMPACT = [
 // ── Expand compact data into full objects ──
 export const WORDS_SEED = WORDS_COMPACT.map((row, index) => {
   const [english, spanish, category, subcategory, difficulty] = row;
-  const [exEn, exEs] = makeExample(english, spanish, category);
+  const [exEn, exEs] = makeExample(english, spanish);
   return {
     english_word: english,
     spanish_trans: spanish,
@@ -1235,7 +1214,9 @@ export const WORDS_SEED = WORDS_COMPACT.map((row, index) => {
     subcategory: subcategory || null,
     frequency_rank: index + 1,
     difficulty: difficulty,
-    image_url: CAT_IMG[category] || CAT_IMG.other,
+    // Left null on purpose: the per-word emoji shows immediately and a real
+    // photo is fetched + cached on first view (see enrichmentService).
+    image_url: null,
     audio_url: null,
     example_en: exEn,
     example_es: exEs,

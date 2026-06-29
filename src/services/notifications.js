@@ -1,21 +1,58 @@
 // saflash — Notification service
-import * as Notifications from 'expo-notifications';
+import Constants, { ExecutionEnvironment } from 'expo-constants';
+import { Platform } from 'react-native';
 import { getConfig } from '../database/sessionRepository';
 
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: false,
-  }),
-});
+const isExpoGoAndroid =
+  Platform.OS === 'android' &&
+  Constants.executionEnvironment === ExecutionEnvironment.StoreClient;
+
+let notificationsModule = null;
+let handlerConfigured = false;
+
+function getNotificationsModule() {
+  if (isExpoGoAndroid) {
+    return null;
+  }
+
+  if (!notificationsModule) {
+    notificationsModule = require('expo-notifications');
+  }
+
+  if (!handlerConfigured) {
+    notificationsModule.setNotificationHandler({
+      handleNotification: async () => ({
+        shouldShowAlert: true,
+        shouldPlaySound: true,
+        shouldSetBadge: false,
+      }),
+    });
+    handlerConfigured = true;
+  }
+
+  return notificationsModule;
+}
+
+export function isNotificationsSupported() {
+  return !isExpoGoAndroid;
+}
 
 export async function requestPermissions() {
+  const Notifications = getNotificationsModule();
+  if (!Notifications) {
+    return false;
+  }
+
   const { status } = await Notifications.requestPermissionsAsync();
   return status === 'granted';
 }
 
 export async function scheduleDailyNotification() {
+  const Notifications = getNotificationsModule();
+  if (!Notifications) {
+    return;
+  }
+
   const config = await getConfig();
 
   if (!config || !config.notifications) {
@@ -42,10 +79,20 @@ export async function scheduleDailyNotification() {
 }
 
 export async function cancelAllNotifications() {
+  const Notifications = getNotificationsModule();
+  if (!Notifications) {
+    return;
+  }
+
   await Notifications.cancelAllScheduledNotificationsAsync();
 }
 
 export async function sendImmediateNotification(title, body) {
+  const Notifications = getNotificationsModule();
+  if (!Notifications) {
+    return;
+  }
+
   await Notifications.scheduleNotificationAsync({
     content: { title, body },
     trigger: null, // immediate
