@@ -60,19 +60,22 @@ export async function getWordCategories() {
   );
 }
 
-export async function getWordsForStudy(cardType = 'word', limit = 20) {
+export async function getWordsForStudy(cardType = 'word', limit = 20, category = null) {
   const db = getDatabase();
   const table = cardType === 'word' ? 'words' : 'phrases';
+  // Only the words table has a frequency_rank column; phrases order by id.
+  const orderCol = cardType === 'word' ? 'w.frequency_rank' : 'w.id';
+  const catClause = category ? ' AND w.category = ?' : '';
 
   // 1. Due cards (highest priority)
   const due = await db.getAllAsync(
     `SELECT w.*, up.status, up.ease_factor, up.interval_days, up.next_review, up.last_review, up.is_favorite
      FROM ${table} w
      INNER JOIN user_progress up ON up.card_id = w.id AND up.card_type = ?
-     WHERE up.next_review <= date('now') AND up.status != 'new' AND up.status != 'known'
+     WHERE up.next_review <= date('now') AND up.status != 'new' AND up.status != 'known'${catClause}
      ORDER BY up.next_review ASC
      LIMIT ?`,
-    [cardType, limit]
+    category ? [cardType, category, limit] : [cardType, limit]
   );
 
   // 2. Fill remaining slots with new cards
@@ -83,10 +86,10 @@ export async function getWordsForStudy(cardType = 'word', limit = 20) {
       `SELECT w.*, up.status, up.ease_factor, up.interval_days, up.next_review, up.last_review, up.is_favorite
        FROM ${table} w
        LEFT JOIN user_progress up ON up.card_id = w.id AND up.card_type = ?
-       WHERE up.card_id IS NULL OR up.status = 'new'
-       ORDER BY w.frequency_rank ASC
+       WHERE (up.card_id IS NULL OR up.status = 'new')${catClause}
+       ORDER BY ${orderCol} ASC
        LIMIT ?`,
-      [cardType, remaining]
+      category ? [cardType, category, remaining] : [cardType, remaining]
     );
   }
 

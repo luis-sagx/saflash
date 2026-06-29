@@ -7,7 +7,7 @@ import {
   toggleNotifications as toggleNotificationsDB,
   updateNotifHour as updateNotifHourDB,
 } from '../database/sessionRepository';
-import { scheduleDailyNotification } from '../services/notifications';
+import { isNotificationsSupported, scheduleDailyNotification } from '../services/notifications';
 import useAppStore from '../store/appStore';
 
 export function useSettings() {
@@ -81,6 +81,7 @@ export function useSettings() {
   return {
     config,
     loading,
+    notificationsSupported: isNotificationsSupported(),
     updateDailyGoal,
     toggleNotifications,
     updateNotifHour,

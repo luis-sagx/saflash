@@ -109,6 +109,10 @@ export async function initDatabase() {
     );
   `);
 
+  // ── Migrations: add enrichment columns if missing ──
+  await addColumnIfMissing(database, 'words', 'definition_en', 'TEXT');
+  await addColumnIfMissing(database, 'words', 'enriched', 'INTEGER DEFAULT 0');
+
   // ── Indexes ───────────────────────────────
   await database.execAsync(`
     CREATE INDEX IF NOT EXISTS idx_words_category    ON words(category);
@@ -131,6 +135,20 @@ export async function initDatabase() {
   }
 
   return database;
+}
+
+/**
+ * Adds a column to a table only if it does not already exist.
+ * SQLite has no "ADD COLUMN IF NOT EXISTS", so we inspect the schema first.
+ */
+async function addColumnIfMissing(database, table, column, definition) {
+  const columns = await database.getAllAsync(`PRAGMA table_info(${table})`);
+  const exists = columns.some(c => c.name === column);
+  if (!exists) {
+    await database.execAsync(
+      `ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`
+    );
+  }
 }
 
 export async function closeDatabase() {
