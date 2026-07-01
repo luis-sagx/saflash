@@ -1,8 +1,9 @@
 // saflash — Study phrases screen
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
 import { COLORS } from '../theme/colors';
 import { SPACING } from '../theme/spacing';
 import { FONT_FAMILY } from '../theme/typography';
@@ -28,7 +29,15 @@ export default function StudyPhrasesScreen({ navigation, route }) {
     scoreCard,
     finishSession,
     resetSession,
-  } = useStudySession(CARD_TYPE.PHRASE, SESSION_SIZE, route.params?.category ?? null);
+  } = useStudySession(CARD_TYPE.PHRASE, SESSION_SIZE, route.params?.category ?? null, route.params?.difficulty ?? null);
+
+  // Guards against a stale confirm modal if this screen is re-focused
+  // (e.g. re-entering a session) without a fresh mount.
+  useFocusEffect(
+    useCallback(() => {
+      setShowExitConfirm(false);
+    }, [])
+  );
 
   const handleExit = () => {
     if (currentIndex > 0 && !isComplete) {
@@ -36,6 +45,11 @@ export default function StudyPhrasesScreen({ navigation, route }) {
     } else {
       navigation.goBack();
     }
+  };
+
+  const handleConfirmExit = () => {
+    setShowExitConfirm(false);
+    navigation.goBack();
   };
 
   const handleContinue = () => {
@@ -120,7 +134,13 @@ export default function StudyPhrasesScreen({ navigation, route }) {
 
       <Text style={styles.hint}>Tocá la tarjeta para ver la traducción</Text>
 
-      {showExitConfirm && (
+      <Modal
+        visible={showExitConfirm}
+        transparent
+        animationType="fade"
+        statusBarTranslucent
+        onRequestClose={() => setShowExitConfirm(false)}
+      >
         <View style={styles.modalOverlay}>
           <View style={styles.modal}>
             <Text style={styles.modalTitle}>¿Salir de la sesión?</Text>
@@ -134,14 +154,14 @@ export default function StudyPhrasesScreen({ navigation, route }) {
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.modalButton, { backgroundColor: COLORS.dangerOrange }]}
-                onPress={() => navigation.goBack()}
+                onPress={handleConfirmExit}
               >
                 <Text style={[styles.modalButtonText, { color: COLORS.surfaceWhite }]}>Salir</Text>
               </TouchableOpacity>
             </View>
           </View>
         </View>
-      )}
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -158,7 +178,7 @@ const styles = StyleSheet.create({
   emptySubtitle: { fontFamily: FONT_FAMILY.regular, fontSize: 14, color: COLORS.textPlaceholder, textAlign: 'center', lineHeight: 20 },
   backButton: { marginTop: SPACING.base, backgroundColor: COLORS.deepOlive, paddingHorizontal: SPACING.xxl, paddingVertical: SPACING.md, borderRadius: 6 },
   backButtonText: { fontFamily: FONT_FAMILY.semiBold, fontSize: 15, color: COLORS.surfaceWhite },
-  modalOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center', zIndex: 100 },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' },
   modal: { backgroundColor: COLORS.surfaceWhite, borderRadius: 16, padding: SPACING.xl, width: '85%', maxWidth: 340 },
   modalTitle: { fontFamily: FONT_FAMILY.bold, fontSize: 18, color: COLORS.deepOlive, marginBottom: SPACING.sm },
   modalText: { fontFamily: FONT_FAMILY.regular, fontSize: 14, color: COLORS.textSecondary, marginBottom: SPACING.xl, lineHeight: 20 },

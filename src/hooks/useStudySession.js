@@ -7,7 +7,7 @@ import { calculateNextReview, getDefaultProgress } from '../services/spacedRepet
 import useAppStore from '../store/appStore';
 import { CARD_TYPE, RATING } from '../utils/constants';
 
-export function useStudySession(cardType = CARD_TYPE.WORD, sessionSize = 20, category = null) {
+export function useStudySession(cardType = CARD_TYPE.WORD, sessionSize = 20, category = null, difficulty = null) {
   const [cards, setCards] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -25,7 +25,7 @@ export function useStudySession(cardType = CARD_TYPE.WORD, sessionSize = 20, cat
     try {
       setLoading(true);
       setError(null);
-      const sessionCards = await getWordsForStudy(cardType, sessionSize, category);
+      const sessionCards = await getWordsForStudy(cardType, sessionSize, category, difficulty);
       setCards(sessionCards);
       setCurrentIndex(0);
       setSessionStats({
@@ -44,7 +44,7 @@ export function useStudySession(cardType = CARD_TYPE.WORD, sessionSize = 20, cat
     } finally {
       setLoading(false);
     }
-  }, [cardType, sessionSize, category, startSession]);
+  }, [cardType, sessionSize, category, difficulty, startSession]);
 
   useEffect(() => {
     loadCards();

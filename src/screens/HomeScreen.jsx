@@ -68,7 +68,7 @@ export default function HomeScreen({ navigation }) {
       {/* Study cards */}
       <TouchableOpacity
         style={[styles.studyCard, { backgroundColor: COLORS.deepOlive }]}
-        onPress={() => navigation.navigate('WordsNavigator', { screen: 'StudyWords' })}
+        onPress={() => navigation.navigate('WordsNavigator')}
         activeOpacity={0.9}
       >
         <View style={styles.studyCardContent}>
@@ -81,7 +81,7 @@ export default function HomeScreen({ navigation }) {
           </View>
           <TouchableOpacity
             style={styles.studyButton}
-            onPress={() => navigation.navigate('WordsNavigator', { screen: 'StudyWords' })}
+            onPress={() => navigation.navigate('WordsNavigator')}
           >
             <Text style={styles.studyButtonText}>Estudiar</Text>
             <Ionicons name="arrow-forward" size={16} color={COLORS.deepOlive} />
@@ -91,7 +91,7 @@ export default function HomeScreen({ navigation }) {
 
       <TouchableOpacity
         style={[styles.studyCard, { backgroundColor: COLORS.successGreen }]}
-        onPress={() => navigation.navigate('PhrasesNavigator', { screen: 'StudyPhrases' })}
+        onPress={() => navigation.navigate('PhrasesNavigator')}
         activeOpacity={0.9}
       >
         <View style={styles.studyCardContent}>
@@ -101,7 +101,7 @@ export default function HomeScreen({ navigation }) {
           </View>
           <TouchableOpacity
             style={styles.studyButton}
-            onPress={() => navigation.navigate('PhrasesNavigator', { screen: 'StudyPhrases' })}
+            onPress={() => navigation.navigate('PhrasesNavigator')}
           >
             <Text style={styles.studyButtonText}>Estudiar</Text>
             <Ionicons name="arrow-forward" size={16} color={COLORS.deepOlive} />

@@ -8,18 +8,27 @@ import { FONT_FAMILY } from '../theme/typography';
 import { usePhrases } from '../hooks/usePhrases';
 import { PHRASE_CATEGORY_HEADERS } from '../database/phrasesRepository';
 import CategoryCard from '../components/CategoryCard';
+import FilterPills from '../components/FilterPills';
 import EmptyState from '../components/EmptyState';
-import { formatCategoryName, formatNumber } from '../utils/formatters';
+import { formatCategoryName, formatNumber, formatDifficulty } from '../utils/formatters';
+import { DIFFICULTY_LEVELS } from '../utils/constants';
 
 export default function PhrasesScreen({ navigation }) {
-  const { categories, loading } = usePhrases();
+  const [levelFilter, setLevelFilter] = useState('all');
+  const difficulty = levelFilter === 'all' ? null : levelFilter;
+  const { categories, loading } = usePhrases(difficulty);
+
+  const levelOptions = [
+    { label: 'Todos', value: 'all' },
+    ...DIFFICULTY_LEVELS.map(level => ({ label: formatDifficulty(level), value: level })),
+  ];
 
   const handleCategoryPress = (category) => {
-    navigation.navigate('PhrasesCategory', { category });
+    navigation.navigate('PhrasesCategory', { category, difficulty });
   };
 
   const handleStudyAll = () => {
-    navigation.navigate('StudyPhrases', { category: null });
+    navigation.navigate('StudyPhrases', { category: null, difficulty });
   };
 
   return (
@@ -29,6 +38,14 @@ export default function PhrasesScreen({ navigation }) {
         <Text style={styles.title}>Frases</Text>
         <Text style={styles.subtitle}>Frases listas para conversaciones reales</Text>
       </View>
+
+      {/* Level filter */}
+      <FilterPills
+        options={levelOptions}
+        selected={levelFilter}
+        onSelect={setLevelFilter}
+        style={styles.filters}
+      />
 
       {/* Categories grid */}
       <FlatList
@@ -85,6 +102,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: COLORS.textSecondary,
     marginTop: 4,
+  },
+  filters: {
+    marginBottom: SPACING.sm,
   },
   grid: {
     paddingHorizontal: SPACING.sm,

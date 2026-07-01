@@ -2,26 +2,25 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
   getPhrases,
-  getPhrasesByCategory,
   getPhraseCategories,
   getKnownPhrasesCount,
 } from '../database/phrasesRepository';
 
-export function usePhrases() {
+export function usePhrases(difficulty = null) {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const loadCategories = useCallback(async () => {
     try {
       setLoading(true);
-      const cats = await getPhraseCategories();
+      const cats = await getPhraseCategories(difficulty);
       setCategories(cats);
     } catch (err) {
       console.error('Error loading phrase categories:', err);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [difficulty]);
 
   useEffect(() => {
     loadCategories();
@@ -30,13 +29,14 @@ export function usePhrases() {
   return { categories, loading, refresh: loadCategories };
 }
 
-export function useCategoryPhrases(category) {
+export function useCategoryPhrases(category, difficulty = null) {
   const [phrases, setPhrases] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!category) return;
-    getPhrasesByCategory(category)
+    setLoading(true);
+    getPhrases({ category, difficulty })
       .then(data => {
         setPhrases(data);
         setLoading(false);
@@ -45,7 +45,7 @@ export function useCategoryPhrases(category) {
         console.error('Error loading category phrases:', err);
         setLoading(false);
       });
-  }, [category]);
+  }, [category, difficulty]);
 
   return { phrases, loading };
 }

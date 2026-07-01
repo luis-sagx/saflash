@@ -11,28 +11,30 @@ import CategoryCard from '../components/CategoryCard';
 import SearchBar from '../components/SearchBar';
 import FilterPills from '../components/FilterPills';
 import EmptyState from '../components/EmptyState';
-import { formatCategoryName, formatNumber } from '../utils/formatters';
+import { formatCategoryName, formatNumber, formatDifficulty } from '../utils/formatters';
+import { DIFFICULTY_LEVELS } from '../utils/constants';
 
 export default function WordsScreen({ navigation }) {
-  const { categories, loading, refresh } = useWords();
   const [searchQuery, setSearchQuery] = useState('');
-  const [difficultyFilter, setDifficultyFilter] = useState('all');
+  const [levelFilter, setLevelFilter] = useState('all');
+  const difficulty = levelFilter === 'all' ? null : levelFilter;
+  const { categories, loading, refresh } = useWords(difficulty);
 
-  const filterOptions = [
+  const levelOptions = [
     { label: 'Todos', value: 'all' },
-    { label: '⭐ Favoritos', value: 'favorites' },
+    ...DIFFICULTY_LEVELS.map(level => ({ label: formatDifficulty(level), value: level })),
   ];
 
   const handleCategoryPress = (category) => {
-    navigation.navigate('WordsCategory', { category });
+    navigation.navigate('WordsCategory', { category, difficulty });
   };
 
   const handleStudyAll = () => {
-    navigation.navigate('StudyWords', { category: null });
+    navigation.navigate('StudyWords', { category: null, difficulty });
   };
 
   const handleStudyCategory = (category) => {
-    navigation.navigate('StudyWords', { category });
+    navigation.navigate('StudyWords', { category, difficulty });
   };
 
   return (
@@ -46,11 +48,11 @@ export default function WordsScreen({ navigation }) {
         />
       </View>
 
-      {/* Filters */}
+      {/* Level filter */}
       <FilterPills
-        options={filterOptions}
-        selected={difficultyFilter}
-        onSelect={setDifficultyFilter}
+        options={levelOptions}
+        selected={levelFilter}
+        onSelect={setLevelFilter}
         style={styles.filters}
       />
 

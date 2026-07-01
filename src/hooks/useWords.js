@@ -2,7 +2,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
   getWords,
-  getWordsByCategory,
   getWordCategories,
   searchWords,
   getFavoriteWords,
@@ -10,21 +9,21 @@ import {
   getKnownWordsCount,
 } from '../database/wordsRepository';
 
-export function useWords() {
+export function useWords(difficulty = null) {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const loadCategories = useCallback(async () => {
     try {
       setLoading(true);
-      const cats = await getWordCategories();
+      const cats = await getWordCategories(difficulty);
       setCategories(cats);
     } catch (err) {
       console.error('Error loading word categories:', err);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [difficulty]);
 
   useEffect(() => {
     loadCategories();
@@ -57,13 +56,14 @@ export function useWordSearch() {
   return { results, searching, search, clearSearch: () => setResults([]) };
 }
 
-export function useCategoryWords(category) {
+export function useCategoryWords(category, difficulty = null) {
   const [words, setWords] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!category) return;
-    getWordsByCategory(category)
+    setLoading(true);
+    getWords({ category, difficulty })
       .then(data => {
         setWords(data);
         setLoading(false);
@@ -72,7 +72,7 @@ export function useCategoryWords(category) {
         console.error('Error loading category words:', err);
         setLoading(false);
       });
-  }, [category]);
+  }, [category, difficulty]);
 
   return { words, loading };
 }

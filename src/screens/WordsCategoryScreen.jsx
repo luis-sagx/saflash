@@ -11,11 +11,11 @@ import { formatCategoryName } from '../utils/formatters';
 import EmptyState from '../components/EmptyState';
 
 export default function WordsCategoryScreen({ route, navigation }) {
-  const { category } = route.params;
-  const { words, loading } = useCategoryWords(category);
+  const { category, difficulty = null } = route.params;
+  const { words, loading } = useCategoryWords(category, difficulty);
 
   const handleStudy = () => {
-    navigation.navigate('StudyWords', { category });
+    navigation.navigate('StudyWords', { category, difficulty });
   };
 
   return (

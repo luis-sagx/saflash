@@ -10,11 +10,11 @@ import { formatCategoryName } from '../utils/formatters';
 import EmptyState from '../components/EmptyState';
 
 export default function PhrasesCategoryScreen({ route, navigation }) {
-  const { category } = route.params;
-  const { phrases, loading } = useCategoryPhrases(category);
+  const { category, difficulty = null } = route.params;
+  const { phrases, loading } = useCategoryPhrases(category, difficulty);
 
   const handleStudy = () => {
-    navigation.navigate('StudyPhrases', { category });
+    navigation.navigate('StudyPhrases', { category, difficulty });
   };
 
   return (

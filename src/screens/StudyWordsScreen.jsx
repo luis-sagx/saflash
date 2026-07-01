@@ -1,8 +1,9 @@
 // saflash — Study words screen (flashcard session)
 import React, { useState, useCallback } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
 import { COLORS } from '../theme/colors';
 import { SPACING } from '../theme/spacing';
 import { FONT_FAMILY } from '../theme/typography';
@@ -28,7 +29,15 @@ export default function StudyWordsScreen({ navigation, route }) {
     scoreCard,
     finishSession,
     resetSession,
-  } = useStudySession(CARD_TYPE.WORD, SESSION_SIZE, route.params?.category ?? null);
+  } = useStudySession(CARD_TYPE.WORD, SESSION_SIZE, route.params?.category ?? null, route.params?.difficulty ?? null);
+
+  // Guards against a stale confirm modal if this screen is re-focused
+  // (e.g. re-entering a session) without a fresh mount.
+  useFocusEffect(
+    useCallback(() => {
+      setShowExitConfirm(false);
+    }, [])
+  );
 
   const handleExit = () => {
     if (currentIndex > 0 && !isComplete) {
@@ -36,6 +45,11 @@ export default function StudyWordsScreen({ navigation, route }) {
     } else {
       navigation.goBack();
     }
+  };
+
+  const handleConfirmExit = () => {
+    setShowExitConfirm(false);
+    navigation.goBack();
   };
 
   const handleContinue = () => {
@@ -140,7 +154,13 @@ export default function StudyWordsScreen({ navigation, route }) {
       </Text>
 
       {/* Exit confirmation modal */}
-      {showExitConfirm && (
+      <Modal
+        visible={showExitConfirm}
+        transparent
+        animationType="fade"
+        statusBarTranslucent
+        onRequestClose={() => setShowExitConfirm(false)}
+      >
         <View style={styles.modalOverlay}>
           <View style={styles.modal}>
             <Text style={styles.modalTitle}>¿Salir de la sesión?</Text>
@@ -158,7 +178,7 @@ export default function StudyWordsScreen({ navigation, route }) {
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.modalButton, { backgroundColor: COLORS.dangerOrange }]}
-                onPress={() => navigation.goBack()}
+                onPress={handleConfirmExit}
               >
                 <Text style={[styles.modalButtonText, { color: COLORS.surfaceWhite }]}>
                   Salir
@@ -167,7 +187,7 @@ export default function StudyWordsScreen({ navigation, route }) {
             </View>
           </View>
         </View>
-      )}
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -237,11 +257,10 @@ const styles = StyleSheet.create({
     color: COLORS.surfaceWhite,
   },
   modalOverlay: {
-    ...StyleSheet.absoluteFillObject,
+    flex: 1,
     backgroundColor: 'rgba(0,0,0,0.4)',
     justifyContent: 'center',
     alignItems: 'center',
-    zIndex: 100,
   },
   modal: {
     backgroundColor: COLORS.surfaceWhite,

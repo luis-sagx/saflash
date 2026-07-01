@@ -50,32 +50,39 @@ export async function getWordById(id) {
   return db.getFirstAsync('SELECT * FROM words WHERE id = ?', [id]);
 }
 
-export async function getWordCategories() {
+export async function getWordCategories(difficulty = null) {
   const db = getDatabase();
+  const diffClause = difficulty ? ' WHERE difficulty = ?' : '';
   return db.getAllAsync(
     `SELECT category, COUNT(*) as count
-     FROM words
+     FROM words${diffClause}
      GROUP BY category
-     ORDER BY count DESC`
+     ORDER BY count DESC`,
+    difficulty ? [difficulty] : []
   );
 }
 
-export async function getWordsForStudy(cardType = 'word', limit = 20, category = null) {
+export async function getWordsForStudy(cardType = 'word', limit = 20, category = null, difficulty = null) {
   const db = getDatabase();
   const table = cardType === 'word' ? 'words' : 'phrases';
   // Only the words table has a frequency_rank column; phrases order by id.
   const orderCol = cardType === 'word' ? 'w.frequency_rank' : 'w.id';
   const catClause = category ? ' AND w.category = ?' : '';
+  const diffClause = difficulty ? ' AND w.difficulty = ?' : '';
+  const extraParams = [
+    ...(category ? [category] : []),
+    ...(difficulty ? [difficulty] : []),
+  ];
 
   // 1. Due cards (highest priority)
   const due = await db.getAllAsync(
     `SELECT w.*, up.status, up.ease_factor, up.interval_days, up.next_review, up.last_review, up.is_favorite
      FROM ${table} w
      INNER JOIN user_progress up ON up.card_id = w.id AND up.card_type = ?
-     WHERE up.next_review <= date('now') AND up.status != 'new' AND up.status != 'known'${catClause}
+     WHERE up.next_review <= date('now') AND up.status != 'new' AND up.status != 'known'${catClause}${diffClause}
      ORDER BY up.next_review ASC
      LIMIT ?`,
-    category ? [cardType, category, limit] : [cardType, limit]
+    [cardType, ...extraParams, limit]
   );
 
   // 2. Fill remaining slots with new cards
@@ -86,10 +93,10 @@ export async function getWordsForStudy(cardType = 'word', limit = 20, category =
       `SELECT w.*, up.status, up.ease_factor, up.interval_days, up.next_review, up.last_review, up.is_favorite
        FROM ${table} w
        LEFT JOIN user_progress up ON up.card_id = w.id AND up.card_type = ?
-       WHERE (up.card_id IS NULL OR up.status = 'new')${catClause}
+       WHERE (up.card_id IS NULL OR up.status = 'new')${catClause}${diffClause}
        ORDER BY ${orderCol} ASC
        LIMIT ?`,
-      category ? [cardType, category, remaining] : [cardType, remaining]
+      [cardType, ...extraParams, remaining]
     );
   }
 

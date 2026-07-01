@@ -38,13 +38,15 @@ export async function getPhraseById(id) {
   return db.getFirstAsync('SELECT * FROM phrases WHERE id = ?', [id]);
 }
 
-export async function getPhraseCategories() {
+export async function getPhraseCategories(difficulty = null) {
   const db = getDatabase();
+  const diffClause = difficulty ? ' WHERE difficulty = ?' : '';
   return db.getAllAsync(
     `SELECT category, COUNT(*) as count
-     FROM phrases
+     FROM phrases${diffClause}
      GROUP BY category
-     ORDER BY count DESC`
+     ORDER BY count DESC`,
+    difficulty ? [difficulty] : []
   );
 }
 
