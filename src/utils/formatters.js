@@ -26,6 +26,8 @@ export function formatSessionDuration(seconds) {
 
 export function formatCategoryName(category) {
   const CATEGORY_NAMES = {
+    vowels: 'Vocales',
+    numbers: 'Números',
     basics: 'Básicas',
     verbs_common: 'Verbos comunes',
     verbs_action: 'Verbos de acción',
@@ -38,7 +40,7 @@ export function formatCategoryName(category) {
     nature: 'Naturaleza',
     animals: 'Animales',
     colors_shapes: 'Colores y formas',
-    numbers_time: 'Números y tiempo',
+    numbers_time: 'Tiempo',
     emotions: 'Emociones',
     work_business: 'Trabajo y negocios',
     technology: 'Tecnología',

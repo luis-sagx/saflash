@@ -1,18 +1,18 @@
 // saflash — Study words screen (flashcard session)
-import React, { useState, useCallback } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Modal } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
-import { useFocusEffect } from '@react-navigation/native';
-import { COLORS } from '../theme/colors';
-import { SPACING } from '../theme/spacing';
-import { FONT_FAMILY } from '../theme/typography';
-import { useStudySession } from '../hooks/useStudySession';
-import { CARD_TYPE, SESSION_SIZE } from '../utils/constants';
-import FlashCard from '../components/FlashCard';
-import ProgressBar from '../components/ProgressBar';
-import LoadingCard from '../components/LoadingCard';
-import SessionSummary from '../components/SessionSummary';
+import React, { useState, useCallback } from "react";
+import { View, Text, TouchableOpacity, StyleSheet, Modal } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
+import { useFocusEffect } from "@react-navigation/native";
+import { COLORS } from "../theme/colors";
+import { SPACING } from "../theme/spacing";
+import { FONT_FAMILY } from "../theme/typography";
+import { useStudySession } from "../hooks/useStudySession";
+import { CARD_TYPE, SESSION_SIZE } from "../utils/constants";
+import FlashCard from "../components/FlashCard";
+import ProgressBar from "../components/ProgressBar";
+import LoadingCard from "../components/LoadingCard";
+import SessionSummary from "../components/SessionSummary";
 
 export default function StudyWordsScreen({ navigation, route }) {
   const [showExitConfirm, setShowExitConfirm] = useState(false);
@@ -29,14 +29,19 @@ export default function StudyWordsScreen({ navigation, route }) {
     scoreCard,
     finishSession,
     resetSession,
-  } = useStudySession(CARD_TYPE.WORD, SESSION_SIZE, route.params?.category ?? null, route.params?.difficulty ?? null);
+  } = useStudySession(
+    CARD_TYPE.WORD,
+    SESSION_SIZE,
+    route.params?.category ?? null,
+    route.params?.difficulty ?? null,
+  );
 
   // Guards against a stale confirm modal if this screen is re-focused
   // (e.g. re-entering a session) without a fresh mount.
   useFocusEffect(
     useCallback(() => {
       setShowExitConfirm(false);
-    }, [])
+    }, []),
   );
 
   const handleExit = () => {
@@ -58,7 +63,7 @@ export default function StudyWordsScreen({ navigation, route }) {
 
   const handleViewProgress = () => {
     finishSession();
-    navigation.navigate('MainTabs', { screen: 'Progress' });
+    navigation.navigate("MainTabs", { screen: "Progress" });
   };
 
   // Session complete
@@ -103,14 +108,21 @@ export default function StudyWordsScreen({ navigation, route }) {
           </TouchableOpacity>
         </View>
         <View style={styles.emptyContainer}>
-          <Ionicons name="book-outline" size={64} color={COLORS.textPlaceholder} />
+          <Ionicons
+            name="book-outline"
+            size={64}
+            color={COLORS.textPlaceholder}
+          />
           <Text style={styles.emptyTitle}>
-            {error || 'No hay tarjetas disponibles'}
+            {error || "No hay tarjetas disponibles"}
           </Text>
           <Text style={styles.emptySubtitle}>
             ¡Felicitaciones! Ya estudiaste todas las tarjetas pendientes.
           </Text>
-          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => navigation.goBack()}
+          >
             <Text style={styles.backButtonText}>Volver</Text>
           </TouchableOpacity>
         </View>
@@ -149,9 +161,7 @@ export default function StudyWordsScreen({ navigation, route }) {
       </View>
 
       {/* Hint */}
-      <Text style={styles.hint}>
-        Tocá la tarjeta para ver la traducción
-      </Text>
+      <Text style={styles.hint}>Toca la tarjeta para ver la traducción</Text>
 
       {/* Exit confirmation modal */}
       <Modal
@@ -169,18 +179,31 @@ export default function StudyWordsScreen({ navigation, route }) {
             </Text>
             <View style={styles.modalButtons}>
               <TouchableOpacity
-                style={[styles.modalButton, { backgroundColor: COLORS.sageCream }]}
+                style={[
+                  styles.modalButton,
+                  { backgroundColor: COLORS.sageCream },
+                ]}
                 onPress={() => setShowExitConfirm(false)}
               >
-                <Text style={[styles.modalButtonText, { color: COLORS.oliveInk }]}>
+                <Text
+                  style={[styles.modalButtonText, { color: COLORS.oliveInk }]}
+                >
                   Continuar
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.modalButton, { backgroundColor: COLORS.dangerOrange }]}
+                style={[
+                  styles.modalButton,
+                  { backgroundColor: COLORS.dangerOrange },
+                ]}
                 onPress={handleConfirmExit}
               >
-                <Text style={[styles.modalButtonText, { color: COLORS.surfaceWhite }]}>
+                <Text
+                  style={[
+                    styles.modalButtonText,
+                    { color: COLORS.surfaceWhite },
+                  ]}
+                >
                   Salir
                 </Text>
               </TouchableOpacity>
@@ -198,8 +221,8 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.warmParchment,
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: SPACING.base,
     paddingVertical: SPACING.sm,
     gap: SPACING.md,
@@ -214,20 +237,20 @@ const styles = StyleSheet.create({
   },
   cardArea: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   hint: {
     fontFamily: FONT_FAMILY.regular,
     fontSize: 13,
     color: COLORS.textPlaceholder,
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: SPACING.xl,
   },
   emptyContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     padding: SPACING.xxl,
     gap: SPACING.base,
   },
@@ -235,13 +258,13 @@ const styles = StyleSheet.create({
     fontFamily: FONT_FAMILY.semiBold,
     fontSize: 18,
     color: COLORS.textSecondary,
-    textAlign: 'center',
+    textAlign: "center",
   },
   emptySubtitle: {
     fontFamily: FONT_FAMILY.regular,
     fontSize: 14,
     color: COLORS.textPlaceholder,
-    textAlign: 'center',
+    textAlign: "center",
     lineHeight: 20,
   },
   backButton: {
@@ -258,15 +281,15 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(0,0,0,0.4)",
+    justifyContent: "center",
+    alignItems: "center",
   },
   modal: {
     backgroundColor: COLORS.surfaceWhite,
     borderRadius: 16,
     padding: SPACING.xl,
-    width: '85%',
+    width: "85%",
     maxWidth: 340,
   },
   modalTitle: {
@@ -283,14 +306,14 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   modalButtons: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: SPACING.md,
   },
   modalButton: {
     flex: 1,
     borderRadius: 6,
     paddingVertical: 12,
-    alignItems: 'center',
+    alignItems: "center",
   },
   modalButtonText: {
     fontFamily: FONT_FAMILY.semiBold,

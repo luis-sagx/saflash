@@ -39,6 +39,7 @@ export default function PronunciationButton({
       onPress={handlePress}
       style={[styles.button, style]}
       activeOpacity={0.7}
+      hitSlop={{ top: 16, bottom: 16, left: 16, right: 16 }}
       accessibilityRole="button"
       accessibilityLabel={active ? 'Detener audio' : 'Reproducir pronunciación'}
     >
@@ -53,6 +54,6 @@ export default function PronunciationButton({
 
 const styles = StyleSheet.create({
   button: {
-    padding: 4,
+    padding: 10,
   },
 });

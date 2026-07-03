@@ -50,16 +50,37 @@ export async function getWordById(id) {
   return db.getFirstAsync('SELECT * FROM words WHERE id = ?', [id]);
 }
 
+// Suggested learning path: easiest / most motivating categories first, so a
+// beginner isn't stuck guessing where to start. Anything not listed here
+// falls back to being sorted by word count, after the curated ones.
+const CATEGORY_LEARNING_ORDER = [
+  'vowels', 'numbers', 'basics', 'colors_shapes', 'family', 'body',
+  'food_drink', 'animals', 'clothing', 'home', 'numbers_time',
+  'verbs_common', 'emotions', 'nature', 'health', 'verbs_action',
+  'adjectives', 'social', 'shopping', 'transport', 'travel', 'sports',
+  'education', 'adverbs', 'arts_culture', 'technology', 'work_business',
+  'other',
+];
+
 export async function getWordCategories(difficulty = null) {
   const db = getDatabase();
   const diffClause = difficulty ? ' WHERE difficulty = ?' : '';
-  return db.getAllAsync(
+  const rows = await db.getAllAsync(
     `SELECT category, COUNT(*) as count
      FROM words${diffClause}
      GROUP BY category
      ORDER BY count DESC`,
     difficulty ? [difficulty] : []
   );
+
+  return rows.sort((a, b) => {
+    const rankA = CATEGORY_LEARNING_ORDER.indexOf(a.category);
+    const rankB = CATEGORY_LEARNING_ORDER.indexOf(b.category);
+    if (rankA === -1 && rankB === -1) return b.count - a.count;
+    if (rankA === -1) return 1;
+    if (rankB === -1) return -1;
+    return rankA - rankB;
+  });
 }
 
 export async function getWordsForStudy(cardType = 'word', limit = 20, category = null, difficulty = null) {
@@ -144,6 +165,8 @@ export async function getKnownWordsCount() {
 
 export async function getCategoryImage(category) {
   const CATEGORY_HEADERS = {
+    vowels: 'https://images.unsplash.com/photo-1509266272358-7701da638078?w=800',
+    numbers: 'https://images.unsplash.com/photo-1509266272358-7701da638078?w=800',
     basics: 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=800',
     verbs_common: 'https://images.unsplash.com/photo-1571008887538-b36bb32f4571?w=800',
     verbs_action: 'https://images.unsplash.com/photo-1571008887538-b36bb32f4571?w=800',

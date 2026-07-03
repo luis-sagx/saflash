@@ -68,6 +68,9 @@ const WORD_EMOJI = {
   pink: '🌸', gray: '⬜', grey: '⬜',
 
   // numbers / time
+  zero: '0️⃣', one: '1️⃣', two: '2️⃣', three: '3️⃣', four: '4️⃣',
+  five: '5️⃣', six: '6️⃣', seven: '7️⃣', eight: '8️⃣', nine: '9️⃣',
+  ten: '🔟',
   number: '🔢', time: '⏰', day: '📅', night: '🌃', morning: '🌅',
   week: '📆', month: '🗓️', year: '📅', hour: '⏰', minute: '⏱️',
   today: '📅', tomorrow: '➡️', yesterday: '⬅️', calendar: '📅',
@@ -113,6 +116,8 @@ const WORD_EMOJI = {
 
 // ── Category fallback emojis ──
 const CATEGORY_EMOJI = {
+  vowels: '🔡',
+  numbers: '🔢',
   basics: '🔤',
   verbs_common: '🏃',
   verbs_action: '⚡',
@@ -125,7 +130,7 @@ const CATEGORY_EMOJI = {
   nature: '🌿',
   animals: '🐾',
   colors_shapes: '🎨',
-  numbers_time: '🔢',
+  numbers_time: '📅',
   emotions: '😊',
   work_business: '💼',
   technology: '💻',
