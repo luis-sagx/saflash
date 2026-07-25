@@ -52,7 +52,7 @@ export default function LessonNode({ lesson, current, align = 'left', showConnec
 const styles = StyleSheet.create({
   row: {
     width: '100%',
-    minHeight: 96,
+    minHeight: 124,
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.sm,
@@ -73,21 +73,24 @@ const styles = StyleSheet.create({
   },
   connector: {
     position: 'absolute',
-    top: 62,
-    width: 220,
-    height: 7,
-    borderRadius: RADIUS.pill,
-    backgroundColor: COLORS.accentOrange,
-    opacity: 0.82,
+    top: 64,
+    width: 250,
+    height: 54,
+    borderColor: COLORS.accentOrange,
+    opacity: 0.75,
     zIndex: 0,
   },
   connectorLeft: {
-    left: 66,
-    transform: [{ rotate: '17deg' }],
+    left: 28,
+    borderRightWidth: 3,
+    borderBottomWidth: 3,
+    borderBottomRightRadius: 42,
   },
   connectorRight: {
-    right: 66,
-    transform: [{ rotate: '-17deg' }],
+    right: 28,
+    borderLeftWidth: 3,
+    borderBottomWidth: 3,
+    borderBottomLeftRadius: 42,
   },
   locked: {
     backgroundColor: COLORS.sageCream,
