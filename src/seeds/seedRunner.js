@@ -1,7 +1,7 @@
 // saflash — Seed runner: populates SQLite on first launch
 import { getDatabase } from '../database/database';
-import { WORDS_SEED } from './words_seed';
-import { PHRASES_SEED } from './phrases_seed';
+import { WORDS_SEED } from './words/index.mjs';
+import { PHRASES_SEED } from './phrases/index.mjs';
 import { getConfig } from '../database/sessionRepository';
 
 export async function runSeedsIfNeeded() {

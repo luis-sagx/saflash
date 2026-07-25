@@ -6,7 +6,9 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "validate": "node scripts/validate-content.mjs",
+    "test": "node --test tests/"
   },
   "dependencies": {
     "@expo-google-fonts/nunito": "^0.2.3",

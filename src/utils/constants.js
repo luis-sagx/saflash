@@ -1,4 +1,5 @@
 // saflash — App constants
+export { LEVELS, LEVEL_LABELS, LEVEL_SELF_DESCRIPTIONS } from './levels.mjs';
 
 export const SESSION_SIZE = 20;
 
