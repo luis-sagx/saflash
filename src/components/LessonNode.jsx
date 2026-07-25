@@ -58,7 +58,7 @@ function PathConnector({ align, rowWidth }) {
 }
 
 function buildConnectorPoints(rowWidth, align) {
-  const leftNodeExit = { x: 54, y: 84 };
+  const leftNodeExit = { x: 36, y: 88 };
   const leftNodeEntry = { x: 28, y: 158 };
   const rightNodeCenterX = rowWidth - 152;
   const rightNodeExit = { x: rightNodeCenterX, y: 84 };
@@ -66,10 +66,9 @@ function buildConnectorPoints(rowWidth, align) {
 
   const start = align === 'right' ? rightNodeExit : leftNodeExit;
   const end = align === 'right' ? leftNodeEntry : rightNodeEntry;
-  const controlA = {
-    x: start.x,
-    y: start.y + 46,
-  };
+  const controlA = align === 'right'
+    ? { x: start.x, y: start.y + 46 }
+    : { x: start.x - 2, y: start.y + 52 };
   const controlB = {
     x: end.x,
     y: end.y - 46,
