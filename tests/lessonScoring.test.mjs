@@ -19,3 +19,8 @@ test('computes accuracy from easy ratings only', () => {
 
   assert.equal(accuracy, 0.5);
 });
+
+test('handles an empty rating list as zero accuracy and one star', () => {
+  assert.equal(accuracyFromRatings([]), 0);
+  assert.equal(starsFromAccuracy(0), 1);
+});

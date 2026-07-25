@@ -63,3 +63,25 @@ test('scores the highest contiguous level with at least one correct answer', () 
 test('scores A1 when there are no correct answers', () => {
   assert.equal(scorePlacement({ A1: [false, false], A2: [false, false] }), 'A1');
 });
+
+test('scores C1 when every level in the chain is passed', () => {
+  assert.equal(scorePlacement({
+    A1: [true, true],
+    A2: [true, false],
+    B1: [true, false],
+    B2: [true, false],
+    C1: [true, false],
+  }), 'C1');
+});
+
+test('skips questions for a level without enough answer options', () => {
+  const sparse = {
+    A1: [word('yes', 'sí', 'basics', 'A1')],
+    A2: [],
+    B1: [],
+    B2: [],
+    C1: [],
+  };
+
+  assert.deepEqual(buildPlacementQuestions(sparse), []);
+});

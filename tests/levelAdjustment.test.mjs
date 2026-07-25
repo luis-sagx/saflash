@@ -26,3 +26,17 @@ test('does not suggest at the bounds or within ten dismissed lessons', () => {
     null
   );
 });
+
+test('does not suggest with fewer than three completed lesson accuracies', () => {
+  assert.equal(
+    getLevelSuggestion({ level: 'B1', recentAccuracies: [1, 1], completedCount: 2, dismissedAt: -1 }),
+    null
+  );
+});
+
+test('does not suggest when recent performance is in the middle band', () => {
+  assert.equal(
+    getLevelSuggestion({ level: 'B1', recentAccuracies: [0.7, 0.6, 0.5], completedCount: 3, dismissedAt: -1 }),
+    null
+  );
+});
