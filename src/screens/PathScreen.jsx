@@ -89,6 +89,7 @@ export default function PathScreen({ navigation }) {
                 lesson={lesson}
                 current={currentLesson?.id === lesson.id}
                 align={index % 2 === 0 ? 'left' : 'right'}
+                showConnector={index < unit.lessons.length - 1}
                 onPress={() => startLesson(lesson)}
               />
             ))}

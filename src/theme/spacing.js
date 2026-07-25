@@ -51,7 +51,7 @@ export const SHADOW = {
 // ── Layout ─────────────────────────────────
 export const LAYOUT = {
   cardWidth: '90%',
-  flashcardHeight: 420,
+  flashcardHeight: 480,
   imageSize: 180,
   thumbnailSize: 50,
   maxContentWidth: 500,

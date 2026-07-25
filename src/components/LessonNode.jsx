@@ -6,13 +6,22 @@ import { COLORS, DifficultyColors } from '../theme/colors';
 import { RADIUS, SPACING } from '../theme/spacing';
 import { FONT_FAMILY } from '../theme/typography';
 
-export default function LessonNode({ lesson, current, align = 'left', onPress }) {
+export default function LessonNode({ lesson, current, align = 'left', showConnector = false, onPress }) {
   const locked = lesson.status === 'locked';
   const completed = lesson.status === 'completed';
   const color = DifficultyColors[lesson.level] || COLORS.deepOlive;
 
   return (
     <View style={[styles.row, align === 'right' && styles.rowRight]}>
+      {showConnector && (
+        <View
+          pointerEvents="none"
+          style={[
+            styles.connector,
+            align === 'right' ? styles.connectorRight : styles.connectorLeft,
+          ]}
+        />
+      )}
       <TouchableOpacity
         style={[
           styles.node,
@@ -43,10 +52,11 @@ export default function LessonNode({ lesson, current, align = 'left', onPress })
 const styles = StyleSheet.create({
   row: {
     width: '100%',
+    minHeight: 96,
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.sm,
-    marginBottom: SPACING.md,
+    position: 'relative',
   },
   rowRight: {
     justifyContent: 'flex-end',
@@ -59,6 +69,25 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.surfaceWhite,
     alignItems: 'center',
     justifyContent: 'center',
+    zIndex: 2,
+  },
+  connector: {
+    position: 'absolute',
+    top: 62,
+    width: 220,
+    height: 7,
+    borderRadius: RADIUS.pill,
+    backgroundColor: COLORS.accentOrange,
+    opacity: 0.82,
+    zIndex: 0,
+  },
+  connectorLeft: {
+    left: 66,
+    transform: [{ rotate: '17deg' }],
+  },
+  connectorRight: {
+    right: 66,
+    transform: [{ rotate: '-17deg' }],
   },
   locked: {
     backgroundColor: COLORS.sageCream,
@@ -66,6 +95,7 @@ const styles = StyleSheet.create({
   },
   meta: {
     width: 116,
+    zIndex: 2,
   },
   title: {
     fontFamily: FONT_FAMILY.semiBold,
