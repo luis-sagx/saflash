@@ -3,6 +3,8 @@ import { LEVELS } from '../src/utils/levels.mjs';
 import { WORDS_BY_LEVEL, WORDS_SEED } from '../src/seeds/words/index.mjs';
 import { PHRASES_BY_LEVEL, PHRASES_SEED } from '../src/seeds/phrases/index.mjs';
 import { CAT_IMG } from '../src/seeds/wordExpander.mjs';
+import { CURRICULUM, TOTAL_LESSONS } from '../src/curriculum/curriculum.mjs';
+import { planLessons } from '../src/curriculum/curriculumBuilder.mjs';
 
 const errors = [];
 
@@ -40,8 +42,13 @@ for (const p of PHRASES_SEED) {
 const ranks = WORDS_SEED.map(w => w.frequency_rank);
 check(new Set(ranks).size === ranks.length, 'Duplicate frequency_rank among words');
 
+const planned = planLessons(CURRICULUM, WORDS_BY_LEVEL, PHRASES_BY_LEVEL);
+check(planned.lessons.length === TOTAL_LESSONS, `Curriculum planned ${planned.lessons.length}/${TOTAL_LESSONS} lessons`);
+for (const warning of planned.warnings) check(false, `Curriculum warning: ${warning}`);
+
 console.log('Words per level:', Object.fromEntries(LEVELS.map(l => [l, WORDS_BY_LEVEL[l].length])));
 console.log('Phrases per level:', Object.fromEntries(LEVELS.map(l => [l, PHRASES_BY_LEVEL[l].length])));
+console.log(`Lessons planned: ${planned.lessons.length}/${TOTAL_LESSONS}`);
 console.log(`Total: ${WORDS_SEED.length} words, ${PHRASES_SEED.length} phrases`);
 
 if (errors.length) {

@@ -1,0 +1,225 @@
+// saflash — Lessons repository: the guided path's persistence layer.
+import { getDatabase } from './database';
+import { LEVELS, levelIndex } from '../utils/levels.mjs';
+
+export async function persistCurriculum(plannedLessons) {
+  const db = getDatabase();
+  const wordRows = await db.getAllAsync('SELECT id, english_word FROM words');
+  const phraseRows = await db.getAllAsync('SELECT id, phrase_en FROM phrases');
+  const wordIds = new Map(wordRows.map(r => [r.english_word, r.id]));
+  const phraseIds = new Map(phraseRows.map(r => [r.phrase_en, r.id]));
+
+  let created = 0;
+
+  await db.withTransactionAsync(async () => {
+    for (const lesson of plannedLessons) {
+      const result = await db.runAsync(
+        `INSERT INTO lessons
+          (level, unit_index, lesson_index, unit_title, category, icon)
+         VALUES (?, ?, ?, ?, ?, ?)`,
+        [
+          lesson.level,
+          lesson.unit_index,
+          lesson.lesson_index,
+          lesson.unit_title,
+          lesson.category,
+          lesson.icon,
+        ]
+      );
+      const lessonId = result.lastInsertRowId;
+
+      let position = 0;
+      for (const word of lesson.words) {
+        const id = wordIds.get(word);
+        if (id == null) throw new Error(`Missing word for lesson: ${word}`);
+        await db.runAsync(
+          'INSERT INTO lesson_cards (lesson_id, card_type, card_id, position) VALUES (?, ?, ?, ?)',
+          [lessonId, 'word', id, position++]
+        );
+      }
+      for (const phrase of lesson.phrases) {
+        const id = phraseIds.get(phrase);
+        if (id == null) throw new Error(`Missing phrase for lesson: ${phrase}`);
+        await db.runAsync(
+          'INSERT INTO lesson_cards (lesson_id, card_type, card_id, position) VALUES (?, ?, ?, ?)',
+          [lessonId, 'phrase', id, position++]
+        );
+      }
+
+      await db.runAsync(
+        "INSERT INTO lesson_progress (lesson_id, status) VALUES (?, 'locked')",
+        [lessonId]
+      );
+      created += 1;
+    }
+  });
+
+  return created;
+}
+
+export async function getLessonCount() {
+  const db = getDatabase();
+  const row = await db.getFirstAsync('SELECT COUNT(*) as count FROM lessons');
+  return row?.count ?? 0;
+}
+
+export async function getPath() {
+  const db = getDatabase();
+  const rows = await db.getAllAsync(`
+    SELECT l.id, l.level, l.unit_index, l.lesson_index, l.unit_title,
+           l.category, l.icon,
+           COALESCE(p.status, 'locked') AS status,
+           COALESCE(p.stars, 0)         AS stars,
+           COALESCE(p.accuracy, 0)      AS accuracy
+    FROM lessons l
+    LEFT JOIN lesson_progress p ON p.lesson_id = l.id
+    ORDER BY l.level, l.unit_index, l.lesson_index
+  `);
+
+  rows.sort((a, b) =>
+    levelIndex(a.level) - levelIndex(b.level) ||
+    a.unit_index - b.unit_index ||
+    a.lesson_index - b.lesson_index
+  );
+
+  const units = [];
+  let current = null;
+  for (const row of rows) {
+    if (!current || current.level !== row.level || current.unit_index !== row.unit_index) {
+      current = {
+        level: row.level,
+        unit_index: row.unit_index,
+        unit_title: row.unit_title,
+        icon: row.icon,
+        lessons: [],
+      };
+      units.push(current);
+    }
+    current.lessons.push({
+      id: row.id,
+      level: row.level,
+      unit_index: row.unit_index,
+      lesson_index: row.lesson_index,
+      category: row.category,
+      status: row.status,
+      stars: row.stars,
+      accuracy: row.accuracy,
+    });
+  }
+  return units;
+}
+
+export async function getLessonCards(lessonId) {
+  const db = getDatabase();
+  const cards = await db.getAllAsync(
+    'SELECT card_type, card_id, position FROM lesson_cards WHERE lesson_id = ? ORDER BY position',
+    [lessonId]
+  );
+
+  const result = [];
+  for (const card of cards) {
+    const table = card.card_type === 'word' ? 'words' : 'phrases';
+    const row = await db.getFirstAsync(`SELECT * FROM ${table} WHERE id = ?`, [card.card_id]);
+    if (row) result.push({ ...row, card_type: card.card_type });
+  }
+  return result;
+}
+
+export async function unlockUpTo(level) {
+  const db = getDatabase();
+  const allowed = LEVELS.slice(0, levelIndex(level) + 1);
+  if (allowed.length === 0) return;
+
+  const placeholders = allowed.map(() => '?').join(', ');
+
+  await db.runAsync(
+    `UPDATE lesson_progress SET status = 'unlocked'
+     WHERE status = 'locked'
+       AND lesson_id IN (SELECT id FROM lessons WHERE level IN (${placeholders}))`,
+    allowed
+  );
+
+  await db.runAsync(
+    `UPDATE lesson_progress SET status = 'locked'
+     WHERE status = 'unlocked'
+       AND lesson_id IN (SELECT id FROM lessons WHERE level NOT IN (${placeholders}))`,
+    allowed
+  );
+
+  const current = await getCurrentLesson();
+  if (!current) {
+    const first = await db.getFirstAsync(
+      `SELECT id FROM lessons WHERE level IN (${placeholders})
+       ORDER BY level, unit_index, lesson_index LIMIT 1`,
+      allowed
+    );
+    if (first) {
+      await db.runAsync(
+        "UPDATE lesson_progress SET status = 'unlocked' WHERE lesson_id = ? AND status = 'locked'",
+        [first.id]
+      );
+    }
+  }
+}
+
+export async function completeLesson(lessonId, accuracy, stars) {
+  const db = getDatabase();
+  const today = new Date().toISOString().split('T')[0];
+
+  await db.runAsync(
+    `UPDATE lesson_progress
+     SET status = 'completed',
+         stars = MAX(stars, ?),
+         accuracy = ?,
+         completed_at = ?
+     WHERE lesson_id = ?`,
+    [stars, accuracy, today, lessonId]
+  );
+
+  const all = await db.getAllAsync('SELECT id, level, unit_index, lesson_index FROM lessons');
+  all.sort((a, b) =>
+    levelIndex(a.level) - levelIndex(b.level) ||
+    a.unit_index - b.unit_index ||
+    a.lesson_index - b.lesson_index
+  );
+
+  const position = all.findIndex(l => l.id === lessonId);
+  const next = position >= 0 ? all[position + 1] : null;
+  if (!next) return { nextLessonId: null };
+
+  await db.runAsync(
+    "UPDATE lesson_progress SET status = 'unlocked' WHERE lesson_id = ? AND status = 'locked'",
+    [next.id]
+  );
+  return { nextLessonId: next.id };
+}
+
+export async function getCurrentLesson() {
+  const units = await getPath();
+  for (const unit of units) {
+    for (const lesson of unit.lessons) {
+      if (lesson.status === 'unlocked') return lesson;
+    }
+  }
+  return null;
+}
+
+export async function getRecentAccuracies(limit = 3) {
+  const db = getDatabase();
+  const rows = await db.getAllAsync(
+    `SELECT accuracy FROM lesson_progress
+     WHERE status = 'completed' AND completed_at IS NOT NULL
+     ORDER BY completed_at DESC, lesson_id DESC
+     LIMIT ?`,
+    [limit]
+  );
+  return rows.map(r => r.accuracy);
+}
+
+export async function getCompletedCount() {
+  const db = getDatabase();
+  const row = await db.getFirstAsync(
+    "SELECT COUNT(*) as count FROM lesson_progress WHERE status = 'completed'"
+  );
+  return row?.count ?? 0;
+}

@@ -109,9 +109,47 @@ export async function initDatabase() {
     );
   `);
 
+  // ── Lessons: the guided path ─────────────
+  await database.execAsync(`
+    CREATE TABLE IF NOT EXISTS lessons (
+      id           INTEGER PRIMARY KEY AUTOINCREMENT,
+      level        TEXT    NOT NULL,
+      unit_index   INTEGER NOT NULL,
+      lesson_index INTEGER NOT NULL,
+      unit_title   TEXT    NOT NULL,
+      category     TEXT    NOT NULL,
+      icon         TEXT,
+      UNIQUE(level, unit_index, lesson_index)
+    );
+  `);
+
+  await database.execAsync(`
+    CREATE TABLE IF NOT EXISTS lesson_cards (
+      lesson_id  INTEGER NOT NULL REFERENCES lessons(id),
+      card_type  TEXT    NOT NULL,
+      card_id    INTEGER NOT NULL,
+      position   INTEGER NOT NULL,
+      PRIMARY KEY (lesson_id, position)
+    );
+  `);
+
+  await database.execAsync(`
+    CREATE TABLE IF NOT EXISTS lesson_progress (
+      lesson_id    INTEGER PRIMARY KEY REFERENCES lessons(id),
+      status       TEXT    DEFAULT 'locked',
+      stars        INTEGER DEFAULT 0,
+      accuracy     REAL    DEFAULT 0,
+      completed_at TEXT
+    );
+  `);
+
   // ── Migrations: add enrichment columns if missing ──
   await addColumnIfMissing(database, 'words', 'definition_en', 'TEXT');
   await addColumnIfMissing(database, 'words', 'enriched', 'INTEGER DEFAULT 0');
+  await addColumnIfMissing(database, 'user_config', 'level', "TEXT DEFAULT 'A1'");
+  await addColumnIfMissing(database, 'user_config', 'placement_done', 'INTEGER DEFAULT 0');
+  await addColumnIfMissing(database, 'user_config', 'current_lesson_id', 'INTEGER');
+  await addColumnIfMissing(database, 'user_config', 'suggestion_dismissed_at', 'INTEGER DEFAULT -1');
 
   // ── Indexes ───────────────────────────────
   await database.execAsync(`
@@ -122,6 +160,9 @@ export async function initDatabase() {
     CREATE INDEX IF NOT EXISTS idx_progress_review   ON user_progress(next_review);
     CREATE INDEX IF NOT EXISTS idx_progress_status   ON user_progress(status);
     CREATE INDEX IF NOT EXISTS idx_progress_card     ON user_progress(card_type, card_id);
+    CREATE INDEX IF NOT EXISTS idx_lessons_level     ON lessons(level, unit_index, lesson_index);
+    CREATE INDEX IF NOT EXISTS idx_lesson_cards      ON lesson_cards(lesson_id, position);
+    CREATE INDEX IF NOT EXISTS idx_lesson_prog_stat  ON lesson_progress(status);
   `);
 
   // Ensure user_config row exists

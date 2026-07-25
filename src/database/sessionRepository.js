@@ -113,3 +113,19 @@ export async function toggleNotifications(enabled) {
 export async function updateNotifHour(hour) {
   await updateConfig({ notif_hour: hour });
 }
+
+export async function setLevel(level) {
+  return updateConfig({ level });
+}
+
+export async function setPlacementDone() {
+  return updateConfig({ placement_done: 1 });
+}
+
+export async function setCurrentLesson(lessonId) {
+  return updateConfig({ current_lesson_id: lessonId });
+}
+
+export async function dismissLevelSuggestion(completedCount) {
+  return updateConfig({ suggestion_dismissed_at: completedCount });
+}
