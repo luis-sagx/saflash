@@ -6,10 +6,9 @@ import { COLORS } from '../theme/colors';
 import { RADIUS, SPACING } from '../theme/spacing';
 import { FONT_FAMILY } from '../theme/typography';
 import { useSettings } from '../hooks/useSettings';
-import { DAILY_GOAL_OPTIONS } from '../utils/constants';
-import { formatNumber } from '../utils/formatters';
+import { DAILY_GOAL_OPTIONS, LEVEL_LABELS } from '../utils/constants';
 
-export default function SettingsScreen() {
+export default function SettingsScreen({ navigation }) {
   const {
     config,
     loading,
@@ -51,6 +50,22 @@ export default function SettingsScreen() {
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <View style={styles.header}>
         <Text style={styles.title}>Ajustes</Text>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Mi nivel</Text>
+        <TouchableOpacity
+          style={styles.settingRow}
+          onPress={() => navigation.getParent()?.getParent()?.navigate('LevelPick', { mode: 'change' })}
+        >
+          <View style={styles.settingInfo}>
+            <Ionicons name="school" size={22} color={COLORS.oliveInk} />
+            <Text style={styles.settingLabel}>
+              {config?.level || 'A1'} · {LEVEL_LABELS[config?.level || 'A1']}
+            </Text>
+          </View>
+          <Ionicons name="chevron-forward" size={20} color={COLORS.textPlaceholder} />
+        </TouchableOpacity>
       </View>
 
       {/* Daily goal */}
@@ -165,7 +180,7 @@ export default function SettingsScreen() {
           <Text style={styles.aboutApp}>saflash</Text>
           <Text style={styles.aboutVersion}>Versión 1.0.0</Text>
           <Text style={styles.aboutDescription}>
-            Aprendé inglés con tarjetas inteligentes. 5,000 palabras y 500 frases con repetición espaciada.
+            Aprendé inglés con tarjetas inteligentes. Ruta guiada A1-C1, modo libre y repetición espaciada.
           </Text>
         </View>
       </View>

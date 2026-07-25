@@ -4,7 +4,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../theme/colors';
 import { FONT_FAMILY } from '../theme/typography';
-import HomeScreen from '../screens/HomeScreen';
+import PathNavigator from './PathNavigator';
 import WordsNavigator from './WordsNavigator';
 import PhrasesNavigator from './PhrasesNavigator';
 import ProgressScreen from '../screens/ProgressScreen';
@@ -48,7 +48,7 @@ export default function MainTabNavigator() {
     >
       <Tab.Screen
         name="Home"
-        component={HomeScreen}
+        component={PathNavigator}
         options={{ tabBarLabel: 'Inicio' }}
       />
       <Tab.Screen

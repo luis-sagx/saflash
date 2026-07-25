@@ -5,15 +5,13 @@ import { COLORS } from '../theme/colors';
 import { SPACING } from '../theme/spacing';
 import { FONT_FAMILY } from '../theme/typography';
 import OnboardingSlide from '../components/OnboardingSlide';
-import { setOnboardingDone, incrementTotalStudied } from '../database/sessionRepository';
-import useAppStore from '../store/appStore';
 
 const { width } = Dimensions.get('window');
 
 const slides = [
   {
-    title: '5,000 Palabras en Inglés',
-    description: 'Aprendé el vocabulario más usado del mundo con tarjetas inteligentes.',
+    title: 'Ruta de Inglés A1-C1',
+    description: 'Aprendé con lecciones cortas y un camino claro por nivel.',
   },
   {
     title: 'Frases Listas para Usar',
@@ -28,12 +26,9 @@ const slides = [
 export default function OnboardingScreen({ navigation }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const flatListRef = useRef(null);
-  const setOnboardingDoneStore = useAppStore(s => s.setOnboardingDone);
 
-  const handleSkip = async () => {
-    await setOnboardingDone();
-    setOnboardingDoneStore(true);
-    navigation.replace('MainTabs');
+  const handleSkip = () => {
+    navigation.navigate('LevelPick', { mode: 'onboarding' });
   };
 
   const handleNext = () => {
@@ -42,10 +37,8 @@ export default function OnboardingScreen({ navigation }) {
     }
   };
 
-  const handleFinish = async () => {
-    await setOnboardingDone();
-    setOnboardingDoneStore(true);
-    navigation.replace('MainTabs');
+  const handleFinish = () => {
+    navigation.navigate('LevelPick', { mode: 'onboarding' });
   };
 
   const onViewableItemsChanged = useRef(({ viewableItems }) => {

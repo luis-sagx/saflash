@@ -195,6 +195,21 @@ export async function completeLesson(lessonId, accuracy, stars) {
 }
 
 export async function getCurrentLesson() {
+  const db = getDatabase();
+  const config = await db.getFirstAsync('SELECT current_lesson_id FROM user_config WHERE id = 1');
+  if (config?.current_lesson_id) {
+    const current = await db.getFirstAsync(`
+      SELECT l.id, l.level, l.unit_index, l.lesson_index, l.category,
+             COALESCE(p.status, 'locked') AS status,
+             COALESCE(p.stars, 0) AS stars,
+             COALESCE(p.accuracy, 0) AS accuracy
+      FROM lessons l
+      LEFT JOIN lesson_progress p ON p.lesson_id = l.id
+      WHERE l.id = ? AND COALESCE(p.status, 'locked') != 'locked'
+    `, [config.current_lesson_id]);
+    if (current && current.status !== 'completed') return current;
+  }
+
   const units = await getPath();
   for (const unit of units) {
     for (const lesson of unit.lessons) {
@@ -202,6 +217,18 @@ export async function getCurrentLesson() {
     }
   }
   return null;
+}
+
+export async function getFirstLessonForLevel(level) {
+  const db = getDatabase();
+  return db.getFirstAsync(
+    `SELECT id, level, unit_index, lesson_index, category
+     FROM lessons
+     WHERE level = ?
+     ORDER BY unit_index, lesson_index
+     LIMIT 1`,
+    [level]
+  );
 }
 
 export async function getRecentAccuracies(limit = 3) {

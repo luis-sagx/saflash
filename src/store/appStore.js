@@ -5,6 +5,8 @@ const useAppStore = create((set, get) => ({
   // ── User ──────────────────────────────────
   onboardingDone: false,
   setOnboardingDone: (done) => set({ onboardingDone: done }),
+  level: 'A1',
+  setLevel: (level) => set({ level }),
 
   // ── Study Session ─────────────────────────
   currentSession: null, // { type: 'word'|'phrase', cards: [], currentIndex: 0 }
